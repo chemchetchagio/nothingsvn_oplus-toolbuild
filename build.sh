@@ -13,9 +13,11 @@ chmod 777 ${work_dir}/bin/*
 chmod 777 ${work_dir}/bin/Linux/x86_64/*
 source $work_dir/functions.sh
 check unzip aria2c curl 7z zip java zipalign python3 zstd bc xmlstarlet aapt
+python3 $work_dir/notify.py download "$repo_name" "$baserom" "$prefix_id" "$builder_name" "$builder_id"
 source "$work_dir/bin/ddevice/getROM.sh" "$baserom"
 BLOB="$work_dir/bin/package/UpdateFile/OOSExtenstionUni"
 
+python3 $work_dir/notify.py unpack "$repo_name" "$baserom" "$prefix_id" "$builder_name" "$builder_id"
 if unzip -l ${baserom} | grep -q "payload.bin"; then
     baserom_type="payload"
     echo "[UNPACK] - This is payload.bin ROM!Vaildation..."

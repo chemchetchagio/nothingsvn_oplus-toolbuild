@@ -14,9 +14,20 @@ on:
         required: false
       
 jobs:
-  Initialize:
+  Build:
     runs-on: ubuntu-latest
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@main
+
+      - name: Start Notify
+        run: |
+          pip install requests
+          python notify.py start "${{ github.repository }}" "${{ inputs.input_url }}" "oplus" "${{ inputs.builder_name }}" "${{ inputs.builder_id }}"
+
       - name: Clean All Unused file,application
         run: |
           docker rmi `docker images -q` || true
@@ -40,27 +51,15 @@ jobs:
           echo "Setting Vienam timezone"
           sudo timedatectl set-timezone Asia/Ho_Chi_Minh
 
-  Build:
-    needs: Initialize
-    runs-on: ubuntu-latest
-    env:
-      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
-    steps:
       - name: Install OpenJDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Checkout repository
-        uses: actions/checkout@main
-
-      - name: Install Stuff & Start Notify
+      - name: Install Stuff
         run: |
-          pip install requests
           sudo bash setup.sh
-          python notify.py start "${{ github.repository }}" "${{ inputs.input_url }}" "oplus" "${{ inputs.builder_name }}" "${{ inputs.builder_id }}"
         
       - name: Giving permission
         run: |
@@ -74,6 +73,7 @@ jobs:
 
       - name: Pack ROM...
         run: |
+          python notify.py pack "${{ github.repository }}" "${{ inputs.input_url }}" "oplus" "${{ inputs.builder_name }}" "${{ inputs.builder_id }}"
           sudo bash packROM.sh n
 
       - name: Setup Rclone...
